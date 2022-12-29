@@ -3,7 +3,8 @@
 from PyPDF2 import PdfWriter
 
 class PdfOut:
-    writer = PdfWriter()
+    def __init__(self):
+        self.writer = PdfWriter()
 
     def write(self, pages, targetFilePath):
         # copy source pages to target
