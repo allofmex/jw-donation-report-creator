@@ -2,6 +2,10 @@
 
 from PyPDF2 import PdfReader
 from PdfOut import PdfOut
+from AccountReportReader import AccountReportReader
+
+csvReader = AccountReportReader();
+csvReader.read('CSV 09#2022.CSV');
 
 reader = PdfReader("source.pdf")
 
