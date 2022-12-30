@@ -2,6 +2,7 @@
 import csv, re
 from re import sub
 from UserDonations import UserDonations
+from datetime import datetime
 
 class AccountReportReader:
 
@@ -32,7 +33,7 @@ class AccountReportReader:
         return self.result
 
     def handleDonateRow(self, row):
-        date = row[1]
+        date = datetime.strptime(row[1], "%d.%m.%y")
         name = row[5].title() # first letter uppercase, rest lower
 
         regEx = re.search(r'^.*SVWZ\+([^+]+)(?:ABWA\+([^+]+))?$', row[4])

@@ -3,23 +3,24 @@ from UserDonations import UserDonations
 from Config import Config
 from StringTools import numberToFinanceStr
 import locale, datetime
+import string
 
 class PdfOut:
     
     def __init__(self, config: Config):
         self.config = config
 
-    def fill(self, pages, donations: UserDonations, userData):
+    def fill(self, pages, donations: UserDonations, userData, rangeStr: string):
         self.writer = PdfWriter()
         # copy source pages to target
         for page in pages:
             self.writer.add_page(page)
 
         # fill pages with data
-        self.__fillOverview(donations, userData)
+        self.__fillOverview(donations, userData, rangeStr)
         self.__fillList(donations)
 
-    def __fillOverview(self, donations, userData) -> None:
+    def __fillOverview(self, donations, userData, rangeStr: string) -> None:
         overviewPage = self.writer.pages[0]
         nameAndAddress = f"{userData['firstName']} {userData['lastName']}\n{userData['street']}\n{userData['place']}"
         total = donations.getTotal()
@@ -29,15 +30,24 @@ class PdfOut:
         locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
         placeAndDate = f"{self.config.get(Config.PLACE)}, {now.strftime('%x')}"
 
-        self.writer.update_page_form_field_values(
-            overviewPage, {"Text1": self.config.get(Config.CONG_NAME),
-                            "SummeB1": numAsText,
-                            "dhFormfield-3975399766": f'{total:.2f}'.replace('.',','),
+        fieldValueList = {"Text1": self.config.get(Config.CONG_NAME),
+                            "SummeB1": f"*{numAsText}*",
+                            "Tag": rangeStr,
                             "Text2": self.config.get(Config.COORDINATOR_TEXT),
                             "Text3": nameAndAddress,
                             "Text5": placeAndDate,
-                           }
-        )
+                            }
+        # original Summe field is auto-calculated. Currently no way to trigger
+        # this via PyPDF2.
+        # Workarround is manually edited pdf form
+        customSumFieldName = self.config.get(Config.FIX_OVERVIEW_SUM_FIELD_NAME, False)
+        sumValueStr = f'*{total:.2f}*'.replace('.',',')
+        if customSumFieldName is not None:
+            fieldValueList[customSumFieldName] = sumValueStr
+        else:
+            fieldValueList["Summe"] = sumValueStr
+        
+        self.writer.update_page_form_field_values(overviewPage, fieldValueList)
 
     def __fillList(self, donations: UserDonations):
         listPage = self.writer.pages[1]
@@ -47,13 +57,18 @@ class PdfOut:
         for idx in range(0, len(donationList)):
             if idx > 24:
                 raise Exception('Not implemented for more than 24 donations per user!', len(donationList))
+            date = donationList[idx].date
             value = donationList[idx].amount
-            fieldValueList[f"Datum{idx+1}"] = donationList[idx].date
-            fieldValueList[f"BetragZ{idx+1}"] = f'{value:.2f}'.replace('.',',')
+            fieldValueList[f"Datum{idx+1}"] = f"{date.strftime('%d.%m.%Y')}"
+            fieldValueList[f"BetragZ{idx+1}"] = f"*{value:.2f}*".replace('.',',')
 
         total = donations.getTotal()
-        fieldValueList["dhFormfield-3975399824"] = f'{total:.2f}'.replace('.',',')
-        fieldValueList["Summe"] = f'{total:.2f}'.replace('.',',')
+        customSumFieldName = self.config.get(Config.FIX_LIST_SUM_FIELD_NAME, False)
+        sumValueStr = f"*{total:.2f}*".replace('.',',')
+        if customSumFieldName is not None:
+            fieldValueList[customSumFieldName] = sumValueStr
+        else:
+            fieldValueList["Summe"] = sumValueStr
 
         self.writer.update_page_form_field_values(
             listPage, fieldValueList

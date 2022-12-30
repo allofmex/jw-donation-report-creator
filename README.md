@@ -17,7 +17,7 @@ Prepare list of names and address
 Manually edit original TO-67b pdf file
 - remove both sum form fields (Gesamtbetrag, Gesamtsumme)
 - add new simple text form fields instead (text-align right)
-- edit script to use field names of newly created fields
+- edit script to use field names of newly created fields (see --verbose option to find field name)
 
 (tested with https://dochub.com, registration required)
 

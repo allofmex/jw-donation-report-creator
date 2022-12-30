@@ -10,9 +10,11 @@ from User import User
 
 from PyPDF2.generic import BooleanObject, NameObject, IndirectObject, TextStringObject
 
-# fullCmdArguments = sys.argv
+verbose = False
+testMode = False
+
 argumentList = sys.argv[1:]
-options, remainder = getopt.getopt(argumentList, "r:", "range=")
+options, remainder = getopt.getopt(argumentList, "r:vt", ["range=", "verbose", "test"])
 for opt, arg in options:
     if opt in ('-r', '--range'):
         startEnd = arg.split("-")
@@ -21,6 +23,11 @@ for opt, arg in options:
         f = "%d.%m.%Y"
         start = datetime.strptime("01."+startEnd[0], f)
         end = datetime.strptime("31."+startEnd[1], f)
+        print("WARNING: range is currently used for print in result file only. Not as filter for account-report input data!")
+    if opt in ('-v', '--verbose'):
+        verbose = True
+    if opt in ('-t', '--test'):
+        testMode = True
 
 locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
 print(f"Preparing file in range {start.strftime('%x')} to {end.strftime('%x')}")
@@ -32,13 +39,15 @@ print(f"Reading account report file(s)")
 donations = csvReader.read('CSV 09#2022.CSV');
 
 reader = PdfReader("source.pdf")
-
-page = reader.pages[0]
 fields = reader.get_fields()
 
-# for field in fields:
-    # print(field+"\n");
-    # print(fields[field])
+rangeStr = f"{start.strftime('%d.%m.%Y')} - {end.strftime('%d.%m.%Y')}"
+if verbose:
+    print("\nFound field names in source pdf file:")
+    for field in fields:
+        print(field);
+        # print(fields[field])
+    print("\n")
 
 config = Config(configFilePath)
 userList = User("user.csv")
@@ -52,10 +61,12 @@ for userName in donations:
     userData = userList.getUserData(userName)
 
     resultFileName = userName.replace(" ", "_") + ".pdf"
-    pdfWriter.fill(reader.pages, userDonations, userData)
+    pdfWriter.fill(reader.pages, userDonations, userData, rangeStr)
 
     pdfWriter.writeFile(resultFileName)
     cnt +=1
-    break
+    if testMode:
+        # write only 1 item
+        break
 
 print(f"Finished. {cnt} files created.")

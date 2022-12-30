@@ -20,4 +20,4 @@ def numberToFinanceStr(number: float|int):
         chr = numberStr[idx]
         result += prefix + mapping[chr]
         prefix = "-"
-    return '*'+result+'*'
+    return result
