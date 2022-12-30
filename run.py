@@ -5,6 +5,9 @@ from PdfOut import PdfOut
 from AccountReportReader import AccountReportReader
 from Config import Config
 
+
+configFilePath = './settings/config.yml';
+
 csvReader = AccountReportReader();
 donations = csvReader.read('CSV 09#2022.CSV');
 
@@ -15,7 +18,7 @@ fields = reader.get_fields()
 
 # for field in fields:
 #     print(field+"\n");
-config = Config()
+config = Config(configFilePath)
 
 pdfWriter = PdfOut(config)
 
@@ -26,4 +29,4 @@ for user in donations:
     pdfWriter.fill(reader.pages, userDonations)
 
     pdfWriter.writeFile(resultFileName)
-    # break
+    break

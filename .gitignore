@@ -6,3 +6,6 @@ __pycache__/
 /.project
 /.pydevproject
 /.settings/
+
+/settings/*
+!/settings/example.config.yml

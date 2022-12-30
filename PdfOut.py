@@ -2,10 +2,11 @@
 
 from PyPDF2 import PdfWriter
 from UserDonations import UserDonations
+from Config import Config
 
 class PdfOut:
     
-    def __init__(self, config):
+    def __init__(self, config: Config):
         self.config = config
 
     def fill(self, pages, donations: UserDonations):
@@ -22,8 +23,11 @@ class PdfOut:
         overviewPage = self.writer.pages[0]
         total = donations.getTotal()
         self.writer.update_page_form_field_values(
-            overviewPage, {"Text1": "abc",
-                           "SummeB1": f'{total:.2f}'.replace('.',',')}
+            overviewPage, {"Text1": self.config.get(Config.CONG_NAME),
+                           "SummeB1": f'{total:.2f}'.replace('.',','),
+                           "Text2": self.config.get(Config.COORDINATOR_TEXT),
+                           "Text3": "anschrift"
+                           }
         )
 
     def __fillList(self, donations: UserDonations):
