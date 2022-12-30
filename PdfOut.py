@@ -2,6 +2,7 @@ from PyPDF2 import PdfWriter
 from UserDonations import UserDonations
 from Config import Config
 from StringTools import numberToFinanceStr
+import locale, datetime
 
 class PdfOut:
     
@@ -23,13 +24,18 @@ class PdfOut:
         nameAndAddress = f"{userData['firstName']} {userData['lastName']}\n{userData['street']}\n{userData['place']}"
         total = donations.getTotal()
         numAsText = numberToFinanceStr(total)
+
+        now = datetime.date.today()
+        locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
+        placeAndDate = f"{self.config.get(Config.PLACE)}, {now.strftime('%x')}"
+
         self.writer.update_page_form_field_values(
             overviewPage, {"Text1": self.config.get(Config.CONG_NAME),
                             "SummeB1": numAsText,
                             "dhFormfield-3975399766": f'{total:.2f}'.replace('.',','),
                             "Text2": self.config.get(Config.COORDINATOR_TEXT),
                             "Text3": nameAndAddress,
-                            "Text5": self.config.get(Config.PLACE),
+                            "Text5": placeAndDate,
                            }
         )
 
