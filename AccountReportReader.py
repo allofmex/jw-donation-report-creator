@@ -10,8 +10,8 @@ class AccountReportReader:
 
     def read(self, csvFilePath):
         with open(csvFilePath, mode='r', encoding='latin-1') as csvfile:
-            spamreader = csv.reader(csvfile, delimiter=';', quotechar='"')
-            for row in spamreader:
+            reader = csv.reader(csvfile, delimiter=';', quotechar='"')
+            for row in reader:
                 # "Auftragskonto";"Buchungstag";"Valutadatum";"Buchungstext";"Verwendungszweck";"Beguenstigter/Zahlungspflichtiger";"Kontonummer";"BLZ";"Betrag";"Waehrung";"Info"
                 action = row[3]
                 if action == "Buchungstext":
@@ -51,7 +51,7 @@ class AccountReportReader:
         self.onDonation(date, name, amount, purpose)
 
     def onDonation(self, date, name, amount, purpose):
-        print(date + " "+name+" "+purpose+" "+str(amount));
+        # print(date + " "+name+" "+purpose+" "+str(amount));
         self.getForName(name).addDonation(date, amount)
 
     def getForName(self, name):

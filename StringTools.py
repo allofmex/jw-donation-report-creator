@@ -14,7 +14,6 @@ def numberToFinanceStr(number: float|int):
     }
 
     numberStr = f'{number:.0f}'
-    print(numberStr)
     result = ""
     prefix = ""
     for idx in range(0, len(numberStr)):
