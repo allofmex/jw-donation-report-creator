@@ -10,7 +10,10 @@ class UserDonations:
         donation = Donation(date, amount)
         self.donations.append(donation)
         # print(str(len(self.donations))+ " existing")
-        
+
+    def getList(self):
+        return self.donations
+
     def getTotal(self):
         total = 0
         for donation in self.donations:

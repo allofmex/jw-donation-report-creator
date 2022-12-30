@@ -47,11 +47,11 @@ class AccountReportReader:
         if "spende" not in purpose.lower():
             raise Exception('Not a donation row??', row[4], purpose)
 
-        amount = row[8]
+        amount = float(row[8].replace(",", "."))
         self.onDonation(date, name, amount, purpose)
 
     def onDonation(self, date, name, amount, purpose):
-        print(date + " "+name+" "+purpose+" "+amount);
+        print(date + " "+name+" "+purpose+" "+str(amount));
         self.getForName(name).addDonation(date, amount)
 
     def getForName(self, name):
