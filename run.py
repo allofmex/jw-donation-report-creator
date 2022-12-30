@@ -5,6 +5,7 @@ from PdfOut import PdfOut
 from AccountReportReader import AccountReportReader
 from Config import Config
 
+from PyPDF2.generic import BooleanObject, NameObject, IndirectObject, TextStringObject
 
 configFilePath = './settings/config.yml';
 
@@ -17,7 +18,9 @@ page = reader.pages[0]
 fields = reader.get_fields()
 
 # for field in fields:
-#     print(field+"\n");
+    # print(field+"\n");
+    # print(fields[field])
+
 config = Config(configFilePath)
 
 pdfWriter = PdfOut(config)

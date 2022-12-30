@@ -4,6 +4,7 @@ class Config:
 
     CONG_NAME='congregationName'
     COORDINATOR_TEXT='coordinatorText'
+    PLACE='place'
     
     def __init__(self, configFilePath):
         file = open(configFilePath, 'r')

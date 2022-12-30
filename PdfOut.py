@@ -1,8 +1,7 @@
-#!/usr/bin/python3
-
 from PyPDF2 import PdfWriter
 from UserDonations import UserDonations
 from Config import Config
+from StringTools import numberToFinanceStr
 
 class PdfOut:
     
@@ -22,11 +21,14 @@ class PdfOut:
     def __fillOverview(self, donations):
         overviewPage = self.writer.pages[0]
         total = donations.getTotal()
+        numAsText = numberToFinanceStr(total)
         self.writer.update_page_form_field_values(
             overviewPage, {"Text1": self.config.get(Config.CONG_NAME),
-                           "SummeB1": f'{total:.2f}'.replace('.',','),
-                           "Text2": self.config.get(Config.COORDINATOR_TEXT),
-                           "Text3": "anschrift"
+                            "SummeB1": numAsText,
+                            "dhFormfield-3975399766": f'{total:.2f}'.replace('.',','),
+                            "Text2": self.config.get(Config.COORDINATOR_TEXT),
+                            "Text3": "anschrift",
+                            "Text5": self.config.get(Config.PLACE),
                            }
         )
 
@@ -41,7 +43,11 @@ class PdfOut:
                 raise Exception('Not implemented for more than 24 donations per user!', len(donationList))
             value = donationList[idx].amount
             fieldValueList[f"Datum{idx+1}"] = donationList[idx].date
-            fieldValueList[f"BetragZ{idx+1}"] = f'{value:.2f}'.replace('.',',') 
+            fieldValueList[f"BetragZ{idx+1}"] = f'{value:.2f}'.replace('.',',')
+
+        total = donations.getTotal()
+        fieldValueList["dhFormfield-3975399824"] = f'{total:.2f}'.replace('.',',')
+        fieldValueList["Summe"] = f'{total:.2f}'.replace('.',',')
 
         self.writer.update_page_form_field_values(
             listPage, fieldValueList
