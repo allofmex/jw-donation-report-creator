@@ -30,6 +30,8 @@ verbose = False
 testMode = False
 start, end = None, None
 
+configFilePath = './settings/config.yml';
+config = Config(configFilePath)
 creator = DonationReportCreator(config)
 
 try:
@@ -60,9 +62,6 @@ except getopt.GetoptError:
 if start is None:
     print("You must use --range option!")
     sys.exit(2)
-
-configFilePath = './settings/config.yml';
-config = Config(configFilePath)
 
 locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
 print(f"Preparing file in range {start.strftime('%x')} to {end.strftime('%x')}")

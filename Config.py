@@ -6,7 +6,9 @@ class Config:
     CONG_NAME='congregationName'
     COORDINATOR_TEXT='coordinatorText'
     PLACE='place'
-    
+
+    EXCLUDE_NAMES='excludedNames'
+
     FIX_OVERVIEW_SUM_FIELD_NAME='customSumField1'
     FIX_LIST_SUM_FIELD_NAME='customSumField2'
     

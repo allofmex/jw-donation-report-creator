@@ -2,9 +2,12 @@
 ## Congregation name and location (as to print in result file)
 congregationName : Anytown West (Anytown)
 coordinatorText : John Doe, 123 Maple Street. Anytown, PA 17101, 0123/12345678
-# Signature location string
+## Signature location string
 place: Anytown
 
-# Workarround. Set names of your self added form fields
+## Comma separated list of name that will be skipped in report creation
+#excludedNames : John Doe,Jane Doe
+
+## Workarround. Set names of your self added form fields
 customSumField1 : field-name 
 customSumField2 : field-name2

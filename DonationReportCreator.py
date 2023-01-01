@@ -18,6 +18,9 @@ class DonationReportCreator:
             userDonations = donations[userName]
             print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
             userData = userList.getUserData(userName)
+            if self.__isNotNeeded(userData):
+                print(f"Skipping {userName}. Not needed because in exclude list.")
+                continue
 
             accountName = userName
             userListName = userData['firstName']+" "+userData['lastName']
@@ -25,7 +28,7 @@ class DonationReportCreator:
             if self.__consistencyCheck(accountName, userListName, userDonations) is False:
                 print(f"!!! Skipped report creation for {accountName}\n")
                 continue
-                
+
             resultFileName = self.targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
             pdfWriter.fill(reader.pages, userDonations, userData, rangeStr)
 
@@ -73,6 +76,12 @@ class DonationReportCreator:
                 return True
             elif key == 'n':
                 return False
+
+    def __isNotNeeded(self, userData):
+        userName = f"{userData['firstName']} {userData['lastName']}"
+        excludeList = self.config.get(Config.EXCLUDE_NAMES, False)
+        return excludeList != None and userName in excludeList.split(",")
+
     def setTestMode(self):
         self.testMode = True
         
