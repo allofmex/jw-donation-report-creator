@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
-import sys, getopt, locale, os
+from DonationReportCreator import DonationReportCreator
+import sys, getopt, locale
 from datetime import datetime
 from PyPDF2 import PdfReader
 from PdfOut import PdfOut
@@ -9,13 +10,15 @@ from Config import Config
 from User import User
 
 from PyPDF2.generic import BooleanObject, NameObject, IndirectObject, TextStringObject
+from apt_pkg import config
 
 verbose = False
 testMode = False
-targetPath = './out'
+
+creator = DonationReportCreator(config)
 
 argumentList = sys.argv[1:]
-options, remainder = getopt.getopt(argumentList, "r:vt", ["range=", "verbose", "test"])
+options, remainder = getopt.getopt(argumentList, "r:yvt", ["range=", "yes", "verbose", "test"])
 for opt, arg in options:
     if opt in ('-r', '--range'):
         startEnd = arg.split("-")
@@ -25,15 +28,18 @@ for opt, arg in options:
         start = datetime.strptime("01."+startEnd[0], f)
         end = datetime.strptime("31."+startEnd[1], f)
         print("WARNING: range is currently used for print in result file only. Not as filter for account-report input data!")
+    if opt in ('-y', '--yes'):
+        creator.setUnattended()
     if opt in ('-v', '--verbose'):
         verbose = True
     if opt in ('-t', '--test'):
-        testMode = True
+        creator.setTestMode()
+
+configFilePath = './settings/config.yml';
+config = Config(configFilePath)
 
 locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
 print(f"Preparing file in range {start.strftime('%x')} to {end.strftime('%x')}")
-
-configFilePath = './settings/config.yml';
 
 csvReader = AccountReportReader();
 print(f"Reading account report file(s)")
@@ -50,27 +56,8 @@ if verbose:
         # print(fields[field])
     print("\n")
 
-config = Config(configFilePath)
 userList = User("user.csv")
 
 pdfWriter = PdfOut(config)
 
-if not os.path.exists(targetPath):
-    os.mkdir(targetPath, 0o700)
-
-cnt = 0;
-for userName in donations:
-    print(f"Creating pdf for {userName}\n")
-    userDonations = donations[userName]
-    userData = userList.getUserData(userName)
-
-    resultFileName = targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
-    pdfWriter.fill(reader.pages, userDonations, userData, rangeStr)
-
-    pdfWriter.writeFile(resultFileName)
-    cnt +=1
-    if testMode:
-        # write only 1 item
-        break
-
-print(f"Finished. {cnt} files created.")
+creator.create(reader, donations, userList, pdfWriter, rangeStr)

@@ -1,4 +1,5 @@
 import csv
+from StringTools import specialCharToAscii
 
 class User:
 
@@ -17,13 +18,17 @@ class User:
             }
     
     def __findRow(self, nameStr):
-        names = nameStr.split(" ")
+        names = specialCharToAscii(nameStr).split(" ")
         lastName = names[len(names)-1]
-        firstName = names[0]
+        firstNames = names[0].split("-")
+        searchFirstName = firstNames[len(firstNames)-1] # last first-name (peter for hans-peter)
         with open(self.csvFilePath, mode='r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
             for row in reader:
-                rowNames = row[0].split(", ")
-                if rowNames[0] == lastName and rowNames[1] == firstName:
+                rowNames = specialCharToAscii(row[0]).replace("-", " ").split(", ")
+                if rowNames[0] == lastName and rowNames[1] == searchFirstName:
                     return row
         raise Exception("No user found!", nameStr)
+    
+    def __splitNameStr(self, nameStr):
+        return 

@@ -35,7 +35,7 @@ class AccountReportReader:
     def handleDonateRow(self, row):
         date = datetime.strptime(row[1], "%d.%m.%y")
         name = row[5].title() # first letter uppercase, rest lower
-
+        note = None
         regEx = re.search(r'^.*SVWZ\+([^+]+)(?:ABWA\+([^+]+))?$', row[4])
         if regEx is None:
             raise Exception('Purpose line cannot be handled', row[4])
@@ -43,17 +43,17 @@ class AccountReportReader:
         if regEx.group(2) is not None:
             # ABWA, abweichender Auftraggeber
             otherName = regEx.group(2)
-            print(f"Diff name '{otherName}'! ({row[4]})")
+            note = f"Transaction on different name! '{otherName}'! ({row[4]})"
 
         if "spende" not in purpose.lower():
             raise Exception('Not a donation row??', row[4], purpose)
 
         amount = float(row[8].replace(",", "."))
-        self.onDonation(date, name, amount, purpose)
+        self.onDonation(date, name, amount, purpose, note)
 
-    def onDonation(self, date, name, amount, purpose):
+    def onDonation(self, date, name, amount, purpose, note):
         # print(date + " "+name+" "+purpose+" "+str(amount));
-        self.getForName(name).addDonation(date, amount)
+        self.getForName(name).addDonation(date, amount, note)
 
     def getForName(self, name):
         userDonations = self.result.get(name)

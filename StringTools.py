@@ -21,3 +21,12 @@ def numberToFinanceStr(number: float|int):
         result += prefix + mapping[chr]
         prefix = "-"
     return result
+
+def specialCharToAscii(text: str):
+    mapping = {
+        ord("ä"):  "ae",
+        ord("ö"):  "oe",
+        ord("ü"):  "ue",
+        ord("é"):  "e"
+    }
+    return text.translate(mapping)
