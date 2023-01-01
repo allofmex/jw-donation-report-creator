@@ -29,7 +29,7 @@ class DonationReportCreator:
             resultFileName = self.targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
             pdfWriter.fill(reader.pages, userDonations, userData, rangeStr)
 
-            # pdfWriter.writeFile(resultFileName)
+            pdfWriter.writeFile(resultFileName)
             cnt +=1
             if self.testMode:
                 # write only 1 item
