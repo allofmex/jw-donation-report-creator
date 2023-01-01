@@ -15,8 +15,8 @@ class DonationReportCreator:
 
         cnt = 0;
         for userName in donations:
-            print(f"Creating pdf for {userName}")
             userDonations = donations[userName]
+            print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
             userData = userList.getUserData(userName)
 
             accountName = userName
