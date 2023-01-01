@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import sys, getopt, locale
+import sys, getopt, locale, os
 from datetime import datetime
 from PyPDF2 import PdfReader
 from PdfOut import PdfOut
@@ -12,6 +12,7 @@ from PyPDF2.generic import BooleanObject, NameObject, IndirectObject, TextString
 
 verbose = False
 testMode = False
+targetPath = './out'
 
 argumentList = sys.argv[1:]
 options, remainder = getopt.getopt(argumentList, "r:vt", ["range=", "verbose", "test"])
@@ -54,13 +55,16 @@ userList = User("user.csv")
 
 pdfWriter = PdfOut(config)
 
+if not os.path.exists(targetPath):
+    os.mkdir(targetPath, 0o700)
+
 cnt = 0;
 for userName in donations:
     print(f"Creating pdf for {userName}\n")
     userDonations = donations[userName]
     userData = userList.getUserData(userName)
 
-    resultFileName = userName.replace(" ", "_") + ".pdf"
+    resultFileName = targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
     pdfWriter.fill(reader.pages, userDonations, userData, rangeStr)
 
     pdfWriter.writeFile(resultFileName)

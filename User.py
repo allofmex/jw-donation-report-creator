@@ -18,10 +18,12 @@ class User:
     
     def __findRow(self, nameStr):
         names = nameStr.split(" ")
+        lastName = names[len(names)-1]
+        firstName = names[0]
         with open(self.csvFilePath, mode='r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
             for row in reader:
                 rowNames = row[0].split(", ")
-                if rowNames[0] == names[1] and rowNames[1] == names[0]:
+                if rowNames[0] == lastName and rowNames[1] == firstName:
                     return row
         raise Exception("No user found!", nameStr)
