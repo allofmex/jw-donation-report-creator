@@ -15,6 +15,11 @@ and update it with your own settings (congregation name,...)
 ### Bank account report
 Export your bank account report (Kontoauszug) for the whole year in CSV-MT940 format
 
+>
+- character set `Latin(-1)`
+- field delimiter `;`
+- String delimiter `"`
+- quote all text cells)
 
 ### Address data
 Prepare list of names and address
@@ -47,9 +52,9 @@ Add the following packages
 pip3 install PyPDF2 readchar
 ```
 
-> PyPDF2 for reading und writing pdf (incl. it's form data)
-
-> readchar for user input (single key without ENTER)
+>
+- PyPDF2 for reading und writing pdf (incl. it's form data)
+- readchar for user input (single key without ENTER)
 
 Download this repositories files and extract in new folder
 

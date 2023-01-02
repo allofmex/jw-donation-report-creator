@@ -41,7 +41,7 @@ class AccountReportReader:
         note = None
         regEx = re.search(r'^.*SVWZ\+([^+]+)(?:ABWA\+([^+]+))?$', row[4])
         if regEx is None:
-            if self.__requestUserConfirm(f"Unclear purpose line found, is this a user-donation? (y/n)\n {row[4]}, {name}") == True:
+            if self.__requestUserConfirm(f"Unclear purpose line found, is this a user-donation? (y/n)\n {date.strftime('%d.%m.%Y')}: '{row[4]}', {name}") == True:
                 print("OK")
                 purpose = ""
             else:
@@ -52,7 +52,7 @@ class AccountReportReader:
             if regEx.group(2) is not None:
                 # ABWA, abweichender Auftraggeber
                 otherName = regEx.group(2)
-                note = f"Transaction on different name! '{otherName}'! ({row[4]})"
+                note = f"{date.strftime('%d.%m.%Y')}: Transaction on different name! '{name}' => '{otherName}'! ({row[4]})"
     
             if "spende" not in purpose.lower() and self.__requestUserConfirm(f"Is this NOT a donation row and can be ignored? (y/n)\n {row[4]}, {name}") == False:
                 raise Exception('Row cannot be handled!', row[4], name, purpose)

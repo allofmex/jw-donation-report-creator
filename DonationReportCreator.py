@@ -65,7 +65,8 @@ class DonationReportCreator:
 
     def __onNotesPresent(self, notes, accountName, userListName):
         print(f"Please check the following message(s). Is this acceptable? (report to create is for '{accountName}')")
-        print(notes)
+        for note in notes:
+            print(f" {note}")
         if (self.unattended):
             print("\n")
             return True
