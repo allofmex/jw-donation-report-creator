@@ -1,6 +1,6 @@
 import os
 from Config import Config
-import readchar
+import readchar, readline # just import readline, it will make input() using arrow/back/.. keys correctly
 
 class DonationReportCreator:
     def __init__(self, config: Config):
@@ -18,6 +18,11 @@ class DonationReportCreator:
             userDonations = donations[userName]
             print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
             userData = userList.getUserData(userName)
+            if userData is None:
+                userData = self.__requestManualUser(userName)
+                if userData is None:
+                    continue
+
             if self.__isNotNeeded(userData):
                 print(f"Skipping {userName}. Not needed because in exclude list.")
                 continue
@@ -72,7 +77,6 @@ class DonationReportCreator:
         while True:
             key = readchar.readkey()
             if key == 'y':
-                print("Accepted!\n")
                 return True
             elif key == 'n':
                 return False
@@ -81,6 +85,33 @@ class DonationReportCreator:
         userName = f"{userData['firstName']} {userData['lastName']}"
         excludeList = self.config.get(Config.EXCLUDE_NAMES, False)
         return excludeList != None and userName in excludeList.split(",")
+    
+    def __requestManualUser(self, userName: str):
+        names = userName.split(", ") # "lastname, firstname"
+        if len(names) == 1:
+            names = userName.split(" ") # "firstname1 and firstname2 lastname"
+            names.reverse()
+        userData = {'firstName': names[len(names)-1],
+                    'lastName': names[0],
+                    'street': "",
+                    'place': ""}
+        print(f"No address data found for '{userName}'")
+
+        while True:
+            print("(s)kip report for user or enter address (m)anually?")
+            key = readchar.readkey()
+            if key == 's':
+                print(f"Skipping report for {userName}\n")
+                return None
+            elif key == 'm':
+                userData['firstName'] = input(f"Firstname [{userData['firstName']}]:") or userData['firstName']
+                userData['lastName'] = input(f"Lastname [{userData['lastName']}]:") or userData['lastName']
+                userData['street'] = input(f"Street and number [{userData['street']}]:") or userData['street']
+                userData['place'] = input(f"Zip code and place: [{userData['place']}]") or userData['place']
+                print(f"Summary\n {userData['firstName']} {userData['lastName']}\n {userData['street']}\n {userData['place']}")
+                if self.__requestUserConfirm(f"Is this correct? (y/n)") == True:
+                    print("OK")
+                    return userData
 
     def setTestMode(self):
         self.testMode = True

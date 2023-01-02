@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from DonationReportCreator import DonationReportCreator
-import sys, getopt, locale
+import os, sys, getopt, locale
 from datetime import datetime
 from PyPDF2 import PdfReader
 from PdfOut import PdfOut
@@ -15,9 +15,12 @@ from apt_pkg import config
 def helpMsg():
     print()
     print("Usage:")
-    print("<run.py> --range=01.2022-12.2022 [--yes | --verbose | --test | --help]")
+    print("<run.py> --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022 [--yes | --verbose | --test | --help]")
+    print("s|source       Bank report source file to read donations from")
+    print("a|addressFile  Csv file containing \"Lastname, Fistname\";\"Street + nr\";zip;\"Place\" rows")
+    print("f|form         TO-67b pdf file (see README.md)")
     print("r|range        Range string to print on output files")
-    print("y|yes          Unattended mode, confirm all questions with yes")
+    print("y|yes          Unattended mode, confirm all questions with yes. Useful for testing, Do not use for final run!")
     print("v|verbose      Print additional data like found form field names in input file")
     print("t|test         Stop after first report. May be used for initial setup/result test")
     print()
@@ -30,13 +33,17 @@ verbose = False
 testMode = False
 start, end = None, None
 
+sourceFilePath = "./mt940.csv"
+addressFilePath = "./user.csv"
+formFilePath = "./TO-67b.pdf"
+
 configFilePath = './settings/config.yml';
 config = Config(configFilePath)
 creator = DonationReportCreator(config)
 
 try:
     argumentList = sys.argv[1:]
-    options, remainder = getopt.getopt(argumentList, "r:yvth", ["range=", "yes", "verbose", "test", "help"])
+    options, remainder = getopt.getopt(argumentList, "rsaf:yvth", ["range=", "source=", "form=", "addressFile=", "yes", "verbose", "test", "help"])
     for opt, arg in options:
         if opt in ('-r', '--range'):
             startEnd = arg.split("-")
@@ -46,6 +53,12 @@ try:
             start = datetime.strptime("01."+startEnd[0], f)
             end = datetime.strptime("31."+startEnd[1], f)
             print("WARNING: range is currently used for print in result file only. Not as filter for account-report input data!")
+        if opt in ('-s', '--source'):
+            sourceFilePath = arg
+        if opt in ('-a', '--addressFile'):
+            addressFilePath = arg
+        if opt in ('-f', '--form'):
+            formFilePath = arg
         if opt in ('-y', '--yes'):
             creator.setUnattended()
         if opt in ('-v', '--verbose'):
@@ -55,10 +68,20 @@ try:
         if opt in ('-h', '--help'):
             helpMsg()
             sys.exit()
-except getopt.GetoptError:
-  helpMsg()
-  sys.exit(2)
+except getopt.GetoptError as e:
+    print(e)
+    helpMsg()
+    sys.exit(2)
 
+if not os.path.exists(sourceFilePath):
+    print(f"Bank report source file '{sourceFilePath}' not found!")
+    sys.exit(2)
+if not os.path.exists(addressFilePath):
+    print(f"Address data file '{addressFilePath}' not found!")
+    sys.exit(2)
+if not os.path.exists(formFilePath):
+    print(f"TO-67b pdf file '{formFilePath}' not found!")
+    sys.exit(2)
 if start is None:
     print("You must use --range option!")
     sys.exit(2)
@@ -68,9 +91,9 @@ print(f"Preparing file in range {start.strftime('%x')} to {end.strftime('%x')}")
 
 csvReader = AccountReportReader();
 print(f"Reading account report file(s)")
-donations = csvReader.read('CSV 09#2022.CSV');
+donations = csvReader.read(sourceFilePath);
 
-reader = PdfReader("source.pdf")
+reader = PdfReader(formFilePath)
 fields = reader.get_fields()
 
 rangeStr = f"{start.strftime('%d.%m.%Y')} - {end.strftime('%d.%m.%Y')}"
@@ -81,7 +104,7 @@ if verbose:
         # print(fields[field])
     print("\n")
 
-userList = User("user.csv")
+userList = User(addressFilePath)
 
 pdfWriter = PdfOut(config)
 

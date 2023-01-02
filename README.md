@@ -24,8 +24,10 @@ Manually edit original TO-67b pdf file
 # Setup
 
 ```
-pip3 install PyPDF2
+pip3 install PyPDF2 readchar
 ```
 
 PyPDF2 for reading und writing pdf (incl. it's form data)
+
+readchar for user input (single key without ENTER)
 

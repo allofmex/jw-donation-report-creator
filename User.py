@@ -9,6 +9,8 @@ class User:
     def getUserData(self, nameStr: str) -> dict:
         """ Result: {firstName: x, lastName: x, street: x, place: x}"""
         row = self.__findRow(nameStr)
+        if row is None:
+            return None
         rowNames = row[0].split(", ")
         return {
             "firstName": rowNames[1],
@@ -26,9 +28,9 @@ class User:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
             for row in reader:
                 rowNames = specialCharToAscii(row[0]).replace("-", " ").split(", ")
-                if rowNames[0] == lastName and rowNames[1] == searchFirstName:
+                if len(rowNames) >= 2 and rowNames[0] == lastName and rowNames[1] == searchFirstName:
                     return row
-        raise Exception("No user found!", nameStr)
+        return None
     
     def __splitNameStr(self, nameStr):
         return 
