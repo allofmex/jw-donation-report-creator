@@ -9,11 +9,8 @@ class PdfOut:
     def __init__(self, config: Config):
         self.config = config
 
-    def fill(self, pages, donations: UserDonations, userData, rangeStr: str, createDate: str):
-        self.writer = PdfWriter()
-        # copy source pages to target
-        for page in pages:
-            self.writer.add_page(page)
+    def fill(self, writer: PdfWriter, donations: UserDonations, userData, rangeStr: str, createDate: str):
+        self.writer = writer
 
         # fill pages with data
         self.__fillOverview(donations, userData, rangeStr, createDate)

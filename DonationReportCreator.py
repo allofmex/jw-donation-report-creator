@@ -1,6 +1,7 @@
 import os
 from Config import Config
 import readchar, readline # just import readline, it will make input() using arrow/back/.. keys correctly
+from PyPDF2 import PdfWriter
 
 class DonationReportCreator:
     def __init__(self, config: Config):
@@ -39,7 +40,20 @@ class DonationReportCreator:
                 continue
 
             resultFileName = self.targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
-            pdfWriter.fill(reader.pages, userDonations, userData, rangeStr, self.createDate)
+            writer = PdfWriter()
+            # need to copy some data from reader, else forms in result are not visible in some apps (or missing in printing)
+            # https://github.com/py-pdf/pypdf/issues/355#issuecomment-786742322
+            # clone_reader_document_root still not working properly
+            writer._info = reader.trailer["/Info"]
+            readerTrailer = reader.trailer["/Root"]
+            writer._root_object.update({
+                    key: readerTrailer[key]
+                    for key in readerTrailer
+                    if key in ("/AcroForm", "/Lang", "/MarkInfo")})
+
+            # copy source pages to target
+            writer.clone_document_from_reader(reader)
+            pdfWriter.fill(writer, userDonations, userData, rangeStr, self.createDate)
 
             pdfWriter.writeFile(resultFileName)
             cnt +=1
