@@ -65,3 +65,16 @@ Run like
  ./run.py --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022
 ```
 Result pdf files will be created in new subfolder `out/`
+
+
+# Debugging
+
+You may find this hints helpful in case of problems with result pdf file (may require additional packages
+
+To check if form fields exist in result file
+
+```
+pdftk ./out/name.pdf dump_data_fields
+```
+
+
