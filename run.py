@@ -15,12 +15,13 @@ from apt_pkg import config
 def helpMsg():
     print()
     print("Usage:")
-    print("<run.py> --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022 [--yes | --verbose | --test | --help]")
+    print("<run.py> --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022 [--date=1.1.2023 | --yes | --verbose | --test | --help]")
     print("s|source       Bank report source file to read donations from")
     print("a|addressFile  Csv file containing \"Lastname, Fistname\";\"Street + nr\";zip;\"Place\" rows")
     print("f|form         TO-67b pdf file (see README.md)")
     print("r|range        Range string to print on output files")
-    print("y|yes          Unattended mode, confirm all questions with yes. Useful for testing, Do not use for final run!")
+    print("d|date         Date string to print in signature line. Current date is used if not provided.")
+    print("y|yes          Unattended mode, confirm most questions with yes. Useful for testing, Do not use for final run!")
     print("v|verbose      Print additional data like found form field names in input file")
     print("t|test         Stop after first report. May be used for initial setup/result test")
     print()
@@ -32,6 +33,7 @@ print ("Donation report creator - Tool to fill TO-67b pdf form with data from ba
 verbose = False
 testMode = False
 start, end = None, None
+createDate = None
 
 sourceFilePath = "./mt940.csv"
 addressFilePath = "./user.csv"
@@ -43,7 +45,7 @@ creator = DonationReportCreator(config)
 
 try:
     argumentList = sys.argv[1:]
-    options, remainder = getopt.getopt(argumentList, "rsaf:yvth", ["range=", "source=", "form=", "addressFile=", "yes", "verbose", "test", "help"])
+    options, remainder = getopt.getopt(argumentList, "rsafd:yvth", ["range=", "source=", "form=", "addressFile=", "date=", "yes", "verbose", "test", "help"])
     for opt, arg in options:
         if opt in ('-r', '--range'):
             startEnd = arg.split("-")
@@ -59,6 +61,8 @@ try:
             addressFilePath = arg
         if opt in ('-f', '--form'):
             formFilePath = arg
+        if opt in ('-d', '--date'):
+            createDate = arg
         if opt in ('-y', '--yes'):
             creator.setUnattended()
         if opt in ('-v', '--verbose'):
@@ -107,6 +111,6 @@ if verbose:
 userList = User(addressFilePath)
 
 pdfWriter = PdfOut(config)
-
+creator.setCreateDate(createDate)
 creator.create(reader, donations, userList, pdfWriter, rangeStr)
 

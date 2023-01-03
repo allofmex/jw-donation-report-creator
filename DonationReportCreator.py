@@ -8,7 +8,11 @@ class DonationReportCreator:
         self.targetPath = './out'
         self.testMode = False
         self.unattended = False
+        self.createDate = None
         
+    def setCreateDate(self, createDate: str):
+        self.createDate = createDate
+
     def create(self, reader, donations, userList, pdfWriter, rangeStr):
         if not os.path.exists(self.targetPath):
             os.mkdir(self.targetPath, 0o700)
@@ -35,7 +39,7 @@ class DonationReportCreator:
                 continue
 
             resultFileName = self.targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
-            pdfWriter.fill(reader.pages, userDonations, userData, rangeStr)
+            pdfWriter.fill(reader.pages, userDonations, userData, rangeStr, self.createDate)
 
             pdfWriter.writeFile(resultFileName)
             cnt +=1

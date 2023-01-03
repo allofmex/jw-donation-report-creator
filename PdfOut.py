@@ -3,24 +3,23 @@ from UserDonations import UserDonations
 from Config import Config
 from StringTools import numberToFinanceStr
 import locale, datetime
-import string
 
 class PdfOut:
     
     def __init__(self, config: Config):
         self.config = config
 
-    def fill(self, pages, donations: UserDonations, userData, rangeStr: string):
+    def fill(self, pages, donations: UserDonations, userData, rangeStr: str, createDate: str):
         self.writer = PdfWriter()
         # copy source pages to target
         for page in pages:
             self.writer.add_page(page)
 
         # fill pages with data
-        self.__fillOverview(donations, userData, rangeStr)
+        self.__fillOverview(donations, userData, rangeStr, createDate)
         self.__fillList(donations)
 
-    def __fillOverview(self, donations, userData, rangeStr: string) -> None:
+    def __fillOverview(self, donations, userData, rangeStr: str, createDate: str) -> None:
         overviewPage = self.writer.pages[0]
         nameAndAddress = f"{userData['firstName']} {userData['lastName']}\n{userData['street']}\n{userData['place']}"
         total = donations.getTotal()
@@ -28,7 +27,9 @@ class PdfOut:
 
         now = datetime.date.today()
         locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
-        placeAndDate = f"{self.config.get(Config.PLACE)}, {now.strftime('%x')}"
+        if createDate is None:
+            createDate = now.strftime('%x')
+        placeAndDate = f"{self.config.get(Config.PLACE)}, {createDate}"
 
         fieldValueList = {"Text1": self.config.get(Config.CONG_NAME),
                             "SummeB1": f"*{numAsText}*",
