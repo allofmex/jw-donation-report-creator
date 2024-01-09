@@ -10,7 +10,7 @@ from Config import Config
 from User import User
 
 from PyPDF2.generic import BooleanObject, NameObject, IndirectObject, TextStringObject
-from apt_pkg import config
+# from apt_pkg import config
 
 def helpMsg():
     print()
@@ -28,7 +28,9 @@ def helpMsg():
     print("Use MT940 csv format for bank account export")
     print()
 
+print()
 print ("Donation report creator - Tool to fill TO-67b pdf form with data from bank account report files")
+print()
 
 verbose = False
 testMode = False

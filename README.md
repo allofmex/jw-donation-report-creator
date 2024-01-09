@@ -46,23 +46,35 @@ Manually edit original TO-67b pdf file (for example via online pdf editor like [
 # Setup
 Install Python 3 if not already present
 
-Add the following packages
-
-```
-pip3 install PyPDF2 readchar
-```
-
->
-- PyPDF2 for reading und writing pdf (incl. it's form data)
-- readchar for user input (single key without ENTER)
 
 Download this repositories files and extract in new folder
+
+```
+mkdir jw-donation-report-creator
+wget -O - https://github.com/allofmex/jw-donation-report-creator/archive/master.tar.gz | tar xz -C jw-donation-report-creator --strip-components=1
+cd jw-donation-report-creator
+
+# Create virtual python environment
+
+apt install python3.11-venv
+python3 -m venv ~/jw_media_tool_venv
+
+source ~/jw_media_tool_venv/bin/activate
+
+pip3 install .
+```
+
 
 # Usage
 Run like
 
 ```
- ./run.py --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022
+
+cd /your/path/jw-donation-report-creator
+# Activate virtual environment
+source ~/jw_media_tool_venv/bin/activate
+
+ ./run.sh --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022
 ```
 Result pdf files will be created in new subfolder `out/`
 
@@ -77,4 +89,9 @@ To check if form fields exist in result file
 pdftk ./out/name.pdf dump_data_fields
 ```
 
+
+## Dependencies
+
+- PyPDF2 for reading und writing pdf (incl. it's form data)
+- readchar for user input (single key without ENTER)
 

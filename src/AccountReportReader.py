@@ -26,12 +26,12 @@ class AccountReportReader:
 
                 if action == "GUTSCHR. UEBERW. DAUERAUFTR" or action == "GUTSCHR. UEBERWEISUNG":
                     name = row[5]
-                    if name.lower().startswith("jehovas zeugen in deutschland, k"): # variable names used "Jehovas Zeugen In Deutschland, Körperschaft Des Öffent", "... K.d.ö.R"...
+                    if name.lower().replace(',', '').startswith("jehovas zeugen in deutschland k"): # variable names used "Jehovas Zeugen In Deutschland, Körperschaft Des Öffent", "... K.d.ö.R"...
                         continue
                     self.handleDonateRow(row)
                 else:
                     print("ToDo "+action)
-                    print("unhandled ".join(row))
+                    print("unhandled2 ".join(row))
 
         return self.result
 

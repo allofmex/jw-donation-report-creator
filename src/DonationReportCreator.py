@@ -39,6 +39,8 @@ class DonationReportCreator:
                 print(f"!!! Skipped report creation for {accountName}\n")
                 continue
 
+            accountName = accountName.replace(" Und ", " und ")
+            userData['accountName'] = accountName
             resultFileName = self.targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
             writer = PdfWriter()
             # need to copy some data from reader, else forms in result are not visible in some apps (or missing in printing)

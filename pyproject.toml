@@ -1,0 +1,13 @@
+[project]
+name = "jw-donation-report-creator"
+description = "Helper to prepare donation tax report form"
+version = "0.1.0"
+authors = [
+    { name = "Allofmex", email = "allofmex@web.de" }
+]
+dependencies = [
+    "PyPDF2",
+    "readchar",
+    "pyyaml",
+    "future",
+]
