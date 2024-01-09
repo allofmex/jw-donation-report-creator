@@ -18,6 +18,7 @@ def helpMsg():
     print("Usage:")
     print("<run.py> --source=mt940.csv --addressFile=user.csv --form=TO-67b.pdf --range=01.2022-12.2022 [--date=1.1.2023 | --yes | --verbose | --test | --help]")
     print("s|source       Bank report source file to read donations from")
+    print("m|manual       Instead of --source, interactive dialog to enter data manually (may be used together with --addressFile option)")
     print("a|addressFile  Csv file containing \"Lastname, Fistname\";\"Street + nr\";zip;\"Place\" rows")
     print("f|form         TO-67b pdf file (see README.md)")
     print("r|range        Range string to print on output files")
@@ -37,6 +38,7 @@ verbose = False
 testMode = False
 start, end = None, None
 createDate = None
+manual = False
 
 sourceFilePath = "./mt940.csv"
 addressFilePath = "./user.csv"
@@ -48,7 +50,7 @@ creator = DonationReportCreator(config)
 
 try:
     argumentList = sys.argv[1:]
-    options, remainder = getopt.getopt(argumentList, "rsafd:yvth", ["range=", "source=", "form=", "addressFile=", "date=", "yes", "verbose", "test", "help"])
+    options, remainder = getopt.getopt(argumentList, "rsafd:myvth", ["range=", "source=", "manual", "form=", "addressFile=", "date=", "yes", "verbose", "test", "help"])
     for opt, arg in options:
         if opt in ('-r', '--range'):
             startEnd = arg.split("-")
@@ -60,6 +62,9 @@ try:
             print(colored("WARNING: --range is currently used for print in result file only. Your bank-account-report must include data of desired date range only!", "red"))
         if opt in ('-s', '--source'):
             sourceFilePath = arg
+        if opt in ('-m', '--manual'):
+            manual = True
+            print("Manual mode")
         if opt in ('-a', '--addressFile'):
             addressFilePath = arg
         if opt in ('-f', '--form'):
@@ -98,10 +103,6 @@ if start is None:
 locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
 print(f"Preparing file in range {start.strftime('%x')} to {end.strftime('%x')}")
 
-csvReader = AccountReportReader(config);
-print(f"Reading account report file(s)")
-donations = csvReader.read(sourceFilePath);
-
 rangeStr = f"{start.strftime('%d.%m.%Y')} - {end.strftime('%d.%m.%Y')}"
 
 userList = User(addressFilePath)
@@ -109,5 +110,12 @@ userList = User(addressFilePath)
 pdfWriter = PdfOut(formFilePath, config)
 creator.setCreateDate(createDate)
 creator.setWriter(pdfWriter)
-creator.create(donations, userList, rangeStr)
+
+if manual:
+    creator.createSingleUser(userList, rangeStr)
+else:
+    csvReader = AccountReportReader(config);
+    print(f"Reading account report file(s)")
+    donations = csvReader.read(sourceFilePath);
+    creator.create(donations, userList, rangeStr)
 

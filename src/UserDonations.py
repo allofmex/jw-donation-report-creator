@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from future.backports.misc import count
+from _datetime import datetime
 
 class UserDonations:
 
@@ -7,7 +7,7 @@ class UserDonations:
         self.donations = list()
         self.notes = None
 
-    def addDonation(self, date, amount, note):
+    def addDonation(self, date: datetime, amount: int, note=None):
         donation = Donation(date, amount)
         self.donations.append(donation)
         if note is not None:
@@ -27,7 +27,7 @@ class UserDonations:
     def getNotes(self):
         return self.notes
 
-    def getOverview(self):
+    def getOverview(self) -> str:
         min = -1
         max = 0
         cnt = 0
@@ -39,8 +39,15 @@ class UserDonations:
                 max = donation.amount
             total += donation.amount
             cnt += 1
-        avr = total / cnt
+        avr = total / cnt if cnt > 0 else 0
         return f"Total: {total: >5.0f}, Cnt: {cnt: >2}  Min: {min: >5.0f}  Max {max: >5.0f}  Avr: {avr: >8.2f}"
+    
+    def getReport(self) -> str:
+        result = ""
+        for donation in self.donations:
+            result += f"{donation.date.strftime('%d.%m.%Y')} {donation.amount}"
+        result += "\n"+self.getOverview()
+        return result
 
     def __repr__(self):
         cnt = len(self.donations)
@@ -48,5 +55,5 @@ class UserDonations:
 
 @dataclass
 class Donation:
-    date: str
+    date: datetime
     amount: float

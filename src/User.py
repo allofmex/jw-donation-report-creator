@@ -21,8 +21,8 @@ class User:
     
     def __findInFile(self, nameStr):
         names = specialCharToAscii(nameStr).split(" ")
-        lastName = names[len(names)-1]
-        firstName = names[0]
+        lastName = names[len(names)-1].lower()
+        firstName = names[0].lower()
         with open(self.csvFilePath, mode='r', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile, delimiter=';', quotechar='"')
             row = self.__findRow(reader, firstName, lastName)
@@ -37,6 +37,6 @@ class User:
     def __findRow(self, reader, searchFirstName, lastName):
         for row in reader:
             rowNames = specialCharToAscii(row[0]).split(", ")
-            if len(rowNames) >= 2 and rowNames[0] == lastName and rowNames[1] == searchFirstName:
+            if len(rowNames) >= 2 and (rowNames[0].lower() == lastName or lastName == '*') and rowNames[1].lower() == searchFirstName:
                 return row
         return None

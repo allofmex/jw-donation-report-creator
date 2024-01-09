@@ -3,6 +3,7 @@ from Config import Config
 from User import User
 from PdfOut import PdfOut
 import readchar, readline # just import readline, it will make input() using arrow/back/.. keys correctly
+from datetime import datetime
 from PyPDF2 import PdfWriter
 from UserDonations import UserDonations
 
@@ -28,25 +29,76 @@ class DonationReportCreator:
         cnt = 0;
         for userName in donations:
             userDonations = donations[userName]
-            if self.createForUser(userName, userDonations, userList, rangeStr):
+            userData = userList.getUserData(userName)
+            if userData is None:
+                userData = self.__requestManualUser(userName)
+                if userData is None:
+                    return False
+    
+            if self.__isNotNeeded(userData):
+                print(f"Skipping {userName}. Not needed because in exclude list.")
+                break
+            if self.__createForUser(userName, userDonations, userData, rangeStr):
                 cnt +=1
                 if self.__testMode:
                     print("Stopping because of test-mode")
                     # write only 1 item
                     break
         print(f"Finished. {cnt} files created.")
+        
+    def createSingleUser(self, userList: User, rangeStr: str) -> None:
+        firstName = input(f"Firstname:").title() # first letter uppercase, rest lower
+        userData = userList.getUserData(firstName+" *")
+        nameSuggest = userData['lastName'] if userData is not None else ''
+        lastName = input(f"Lastname [{nameSuggest}]").title() or nameSuggest
 
-    def createForUser(self, userName: str, userDonations: UserDonations, userList: User, rangeStr: str) -> bool:
-        print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
-        userData = userList.getUserData(userName)
-        if userData is None:
+        userName = f"{firstName} {lastName}"
+        if lastName != nameSuggest:
             userData = self.__requestManualUser(userName)
-            if userData is None:
-                return False
+        else:
+            print(f"Address found: {userData['firstName']}, {userData['lastName']}, {userData['street']}, {userData['place']}")
 
-        if self.__isNotNeeded(userData):
-            print(f"Skipping {userName}. Not needed because in exclude list.")
-            return False
+        if userData is None:
+            print("Not enough data")
+            return    
+
+        donations = UserDonations()
+        self.__requestDonationInfo(donations)
+
+        print("Summary:")
+        print(f"{donations.getReport()}")
+        if self.__requestUserConfirm(f"Is this correct? (y/n)") == True:
+            if self.__createForUser(userName, donations, userData, rangeStr):
+                print("OK")
+        else:
+            print("Sorry")
+            
+        
+    def __requestDonationInfo(self, donations: UserDonations) -> None:
+        dateStr = ''
+        amount = 0
+        f = "%d.%m.%y"
+        print("Enter donations")
+        while True:
+            date = None
+            while date is None:
+                dateStr = input(f"Date (day.month.year like 1.1.23) or c if complete [{dateStr}]:") or dateStr
+                if dateStr == "c":
+                    return
+                try:
+                    date = datetime.strptime(dateStr, f)
+                except ValueError:
+                    print("Invalid date")
+                    date = ''
+
+            amount = int(input(f"Amount [{amount}]:")) or amount
+            if amount <= 0:
+                print("Invalid amount")
+                continue
+            donations.addDonation(date, amount)
+
+    def __createForUser(self, userName: str, userDonations: UserDonations, userData: dict, rangeStr: str) -> bool:
+        print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
 
         accountName = userName
         userListName = userData['firstName']+" "+userData['lastName']
