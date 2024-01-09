@@ -2,6 +2,7 @@
 
 from DonationReportCreator import DonationReportCreator
 import os, sys, getopt, locale
+from termcolor import colored
 from datetime import datetime
 from PyPDF2 import PdfReader
 from PdfOut import PdfOut
@@ -29,7 +30,7 @@ def helpMsg():
     print()
 
 print()
-print ("Donation report creator - Tool to fill TO-67b pdf form with data from bank account report files")
+print ("###", colored("Donation report creator - Tool to fill TO-67b pdf form with data from bank account report files", 'cyan'), "###")
 print()
 
 verbose = False
@@ -56,7 +57,7 @@ try:
             f = "%d.%m.%Y"
             start = datetime.strptime("01."+startEnd[0], f)
             end = datetime.strptime("31."+startEnd[1], f)
-            print("WARNING: range is currently used for print in result file only. Not as filter for account-report input data!")
+            print(colored("WARNING: --range is currently used for print in result file only. Your bank-account-report must include data of desired date range only!", "red"))
         if opt in ('-s', '--source'):
             sourceFilePath = arg
         if opt in ('-a', '--addressFile'):
@@ -95,7 +96,7 @@ if start is None:
 locale.setlocale(locale.LC_TIME,'de_DE.UTF-8')
 print(f"Preparing file in range {start.strftime('%x')} to {end.strftime('%x')}")
 
-csvReader = AccountReportReader();
+csvReader = AccountReportReader(config);
 print(f"Reading account report file(s)")
 donations = csvReader.read(sourceFilePath);
 

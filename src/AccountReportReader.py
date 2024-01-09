@@ -2,12 +2,20 @@
 import csv, re
 from re import sub
 from UserDonations import UserDonations
+from Config import Config
 from datetime import datetime
 import readchar
+from termcolor import colored
 
 class AccountReportReader:
 
-    def __init__(self):
+    DATE_COL = 1
+    NAME_COL = 5
+    PURPOSE_COL = 4
+    AMOUNT_COL = 8
+
+    def __init__(self, config: Config):
+        self.config = config
         self.result = {}
 
     def read(self, csvFilePath):
@@ -29,19 +37,20 @@ class AccountReportReader:
                     if name.lower().replace(',', '').startswith("jehovas zeugen in deutschland k"): # variable names used "Jehovas Zeugen In Deutschland, Körperschaft Des Öffent", "... K.d.ö.R"...
                         continue
                     self.handleDonateRow(row)
+                elif  row[self.AMOUNT_COL].startswith("-"):
+                    continue
                 else:
-                    print("ToDo "+action)
-                    print("unhandled2 ".join(row))
+                    print(colored("This line cannot be handled by this tool:", 'red'), self.__getRowPrint(row))
 
         return self.result
 
     def handleDonateRow(self, row):
-        date = datetime.strptime(row[1], "%d.%m.%y")
-        name = row[5].title() # first letter uppercase, rest lower
+        date = datetime.strptime(row[self.DATE_COL], "%d.%m.%y")
+        name = row[self.NAME_COL].title() # first letter uppercase, rest lower
         note = None
-        regEx = re.search(r'^.*SVWZ\+([^+]+)(?:ABWA\+([^+]+))?$', row[4])
+        regEx = re.search(r'^.*SVWZ\+([^+]+)(?:ABWA\+([^+]+))?$', row[self.PURPOSE_COL])
         if regEx is None:
-            if self.__requestUserConfirm(f"Unclear purpose line found, is this a user-donation? (y/n)\n {date.strftime('%d.%m.%Y')}: '{row[4]}', {name}") == True:
+            if self.__requestUserConfirm(f"Unclear purpose line found, is this a user-donation? (y/n)\n {date.strftime('%d.%m.%Y')}: '{row[self.PURPOSE_COL]}', {name}") == True:
                 print("OK")
                 purpose = ""
             else:
@@ -52,16 +61,21 @@ class AccountReportReader:
             if regEx.group(2) is not None:
                 # ABWA, abweichender Auftraggeber
                 otherName = regEx.group(2)
-                note = f"{date.strftime('%d.%m.%Y')}: Transaction on different name! '{name}' => '{otherName}'! ({row[4]})"
+                note = f"{date.strftime('%d.%m.%Y')}: Transaction on different name! '{name}' => '{otherName}'! ({row[self.PURPOSE_COL]})"
     
             if "spende" not in purpose.lower() and self.__requestUserConfirm(f"Is this NOT a donation row and can be ignored? (y/n)\n {row[4]}, {name}") == False:
-                raise Exception('Row cannot be handled!', row[4], name, purpose)
+                raise Exception('Row cannot be handled!', self.__getRowPrint(row))
 
-        amount = float(row[8].replace(",", "."))
+        amount = float(row[self.AMOUNT_COL].replace(",", "."))
         self.onDonation(date, name, amount, purpose, note)
 
     def onDonation(self, date, name, amount, purpose, note):
         # print(date + " "+name+" "+purpose+" "+str(amount));
+        replaceNames = self.config.get(Config.REPLACE_NAMES, False)
+        if name in replaceNames:
+            print(f"Replacing bank report name '{name}' by '{replaceNames[name]}' (config file setting)")
+            name = replaceNames[name]
+            
         self.getForName(name).addDonation(date, amount, note)
 
     def getForName(self, name):
@@ -72,6 +86,7 @@ class AccountReportReader:
         return userDonations
 
     def __requestUserConfirm(self, msg):
+        print()
         print(msg)
         while True:
             key = readchar.readkey()
@@ -79,3 +94,10 @@ class AccountReportReader:
                 return True
             elif key == 'n':
                 return False
+            
+    def __getRowPrint(self, row: list[str]) -> str:
+        purpose = row[self.PURPOSE_COL]
+        if len(purpose) > 50:
+            purpose = purpose[0:50] + "..."
+        return f"{row[self.DATE_COL]}, {row[self.AMOUNT_COL]}: {row[self.NAME_COL]}, {purpose}"
+        

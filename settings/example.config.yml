@@ -8,6 +8,12 @@ place: Anytown
 ## Comma separated list of name that will be skipped in report creation
 #excludedNames : John Doe,Jane Doe
 
+## Name replacements, usefull for example if bank account report contains mutliple names for 
+## same user, but report only one report must be created of all versions
+#nameReplacements :
+#  John-Michael Doe : John Doe
+#  Janice Doe : Jane Doe 
+
 ## Workarround. Set names of your self added form fields
 customSumField1 : field-name 
 customSumField2 : field-name2

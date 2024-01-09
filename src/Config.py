@@ -8,6 +8,7 @@ class Config:
     PLACE='place'
 
     EXCLUDE_NAMES='excludedNames'
+    REPLACE_NAMES='nameReplacements'
 
     FIX_OVERVIEW_SUM_FIELD_NAME='customSumField1'
     FIX_LIST_SUM_FIELD_NAME='customSumField2'

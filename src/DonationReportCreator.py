@@ -1,5 +1,7 @@
 import os
 from Config import Config
+from User import User
+from PdfOut import PdfOut
 import readchar, readline # just import readline, it will make input() using arrow/back/.. keys correctly
 from PyPDF2 import PdfWriter
 
@@ -14,7 +16,7 @@ class DonationReportCreator:
     def setCreateDate(self, createDate: str):
         self.createDate = createDate
 
-    def create(self, reader, donations, userList, pdfWriter, rangeStr):
+    def create(self, reader, donations, userList: User, pdfWriter: PdfOut, rangeStr):
         if not os.path.exists(self.targetPath):
             os.mkdir(self.targetPath, 0o700)
 

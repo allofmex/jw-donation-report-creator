@@ -10,4 +10,5 @@ dependencies = [
     "readchar",
     "pyyaml",
     "future",
+    "termcolor",
 ]
