@@ -18,7 +18,7 @@ class PdfOut:
 
     def __fillOverview(self, donations, userData, rangeStr: str, createDate: str) -> None:
         overviewPage = self.writer.pages[0]
-        nameAndAddress = f"{userData['accountName']}\n{userData['street']}\n{userData['place']}"
+        nameAndAddress = f"\n{userData['accountName']}\n{userData['street']}\n{userData['place']}"
         total = donations.getTotal()
         numAsText = numberToFinanceStr(total)
 
