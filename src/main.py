@@ -4,7 +4,7 @@ from DonationReportCreator import DonationReportCreator
 import os, sys, getopt, locale
 from termcolor import colored
 from datetime import datetime
-from PyPDF2 import PdfReader
+
 from PdfOut import PdfOut
 from AccountReportReader import AccountReportReader
 from Config import Config
@@ -70,8 +70,10 @@ try:
             creator.setUnattended()
         if opt in ('-v', '--verbose'):
             verbose = True
+            print("Verbose mode")
         if opt in ('-t', '--test'):
             creator.setTestMode()
+            print("Testmode active")
         if opt in ('-h', '--help'):
             helpMsg()
             sys.exit()
@@ -100,20 +102,12 @@ csvReader = AccountReportReader(config);
 print(f"Reading account report file(s)")
 donations = csvReader.read(sourceFilePath);
 
-reader = PdfReader(formFilePath)
-fields = reader.get_fields()
-
 rangeStr = f"{start.strftime('%d.%m.%Y')} - {end.strftime('%d.%m.%Y')}"
-if verbose:
-    print("\nFound field names in source pdf file:")
-    for field in fields:
-        print(field);
-        # print(fields[field])
-    print("\n")
 
 userList = User(addressFilePath)
 
-pdfWriter = PdfOut(config)
+pdfWriter = PdfOut(formFilePath, config)
 creator.setCreateDate(createDate)
-creator.create(reader, donations, userList, pdfWriter, rangeStr)
+creator.setWriter(pdfWriter)
+creator.create(donations, userList, rangeStr)
 

@@ -4,67 +4,66 @@ from User import User
 from PdfOut import PdfOut
 import readchar, readline # just import readline, it will make input() using arrow/back/.. keys correctly
 from PyPDF2 import PdfWriter
+from UserDonations import UserDonations
 
 class DonationReportCreator:
     def __init__(self, config: Config):
-        self.config = config
-        self.targetPath = './out'
-        self.testMode = False
-        self.unattended = False
-        self.createDate = None
+        self.__config = config
+        self.__targetPath = './out'
+        self.__testMode = False
+        self.__unattended = False
+        self.__createDate = None
+        self.__writer = None
         
     def setCreateDate(self, createDate: str):
-        self.createDate = createDate
+        self.__createDate = createDate
+        
+    def setWriter(self, pdfWriter: PdfOut):
+        self.__writer = pdfWriter
 
-    def create(self, reader, donations, userList: User, pdfWriter: PdfOut, rangeStr):
-        if not os.path.exists(self.targetPath):
-            os.mkdir(self.targetPath, 0o700)
+    def create(self, donations, userList: User, rangeStr: str) -> None:
+        if not os.path.exists(self.__targetPath):
+            os.mkdir(self.__targetPath, 0o700)
 
         cnt = 0;
         for userName in donations:
             userDonations = donations[userName]
-            print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
-            userData = userList.getUserData(userName)
-            if userData is None:
-                userData = self.__requestManualUser(userName)
-                if userData is None:
-                    continue
-
-            if self.__isNotNeeded(userData):
-                print(f"Skipping {userName}. Not needed because in exclude list.")
-                continue
-
-            accountName = userName
-            userListName = userData['firstName']+" "+userData['lastName']
-
-            if self.__consistencyCheck(accountName, userListName, userDonations) is False:
-                print(f"!!! Skipped report creation for {accountName}\n")
-                continue
-
-            accountName = accountName.replace(" Und ", " und ")
-            userData['accountName'] = accountName
-            resultFileName = self.targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
-            writer = PdfWriter()
-            # need to copy some data from reader, else forms in result are not visible in some apps (or missing in printing)
-            # https://github.com/py-pdf/pypdf/issues/355#issuecomment-786742322
-            # clone_reader_document_root still not working properly
-            writer._info = reader.trailer["/Info"]
-            readerTrailer = reader.trailer["/Root"]
-            writer._root_object.update({
-                    key: readerTrailer[key]
-                    for key in readerTrailer
-                    if key in ("/AcroForm", "/Lang", "/MarkInfo")})
-
-            # copy source pages to target
-            writer.clone_document_from_reader(reader)
-            pdfWriter.fill(writer, userDonations, userData, rangeStr, self.createDate)
-
-            pdfWriter.writeFile(resultFileName)
-            cnt +=1
-            if self.testMode:
-                # write only 1 item
-                break
+            if self.createForUser(userName, userDonations, userList, rangeStr):
+                cnt +=1
+                if self.__testMode:
+                    print("Stopping because of test-mode")
+                    # write only 1 item
+                    break
         print(f"Finished. {cnt} files created.")
+
+    def createForUser(self, userName: str, userDonations: UserDonations, userList: User, rangeStr: str) -> bool:
+        print(f"Creating pdf for {userName: <40}" + userDonations.getOverview())
+        userData = userList.getUserData(userName)
+        if userData is None:
+            userData = self.__requestManualUser(userName)
+            if userData is None:
+                return False
+
+        if self.__isNotNeeded(userData):
+            print(f"Skipping {userName}. Not needed because in exclude list.")
+            return False
+
+        accountName = userName
+        userListName = userData['firstName']+" "+userData['lastName']
+
+        if self.__consistencyCheck(accountName, userListName, userDonations) is False:
+            print(f"!!! Skipped report creation for {accountName}\n")
+            return False
+
+        accountName = accountName.replace(" Und ", " und ")
+        userData['accountName'] = accountName
+        resultFileName = self.__targetPath +"/"+ userName.replace(" ", "_") + ".pdf"
+
+        if (self.__writer is None):
+            raise Exception('No __writer set!')
+        self.__writer.fill(userDonations, userData, rangeStr, self.__createDate)
+        self.__writer.writeFile(resultFileName)
+        return True
 
     def __consistencyCheck(self, accountName, userListName, userDonations):
         if userListName != accountName:
@@ -80,7 +79,7 @@ class DonationReportCreator:
         print(f"Name in bank report: {accountName}")
         print(f"Name in user list: {userListName}")
         print(f"Address will be used from '{userListName}', Name on donation report will be '{accountName}'")
-        if (self.unattended):
+        if (self.__unattended):
             print("\n")
             return True
         return self.__requestUserConfirm("Is this correct? (y/n)")
@@ -89,7 +88,7 @@ class DonationReportCreator:
         print(f"Please check the following message(s). Is this acceptable? (report to create is for '{accountName}')")
         for note in notes:
             print(f" {note}")
-        if (self.unattended):
+        if (self.__unattended):
             print("\n")
             return True
         return self.__requestUserConfirm("Is found data valid? (y/n)")
@@ -106,7 +105,7 @@ class DonationReportCreator:
 
     def __isNotNeeded(self, userData):
         userName = f"{userData['firstName']} {userData['lastName']}"
-        excludeList = self.config.get(Config.EXCLUDE_NAMES, False)
+        excludeList = self.__config.get(Config.EXCLUDE_NAMES, False)
         return excludeList != None and userName in excludeList.split(",")
     
     def __requestManualUser(self, userName: str):
@@ -137,7 +136,7 @@ class DonationReportCreator:
                     return userData
 
     def setTestMode(self):
-        self.testMode = True
+        self.__testMode = True
         
     def setUnattended(self):
-        self.unattended = True
+        self.__unattended = True
