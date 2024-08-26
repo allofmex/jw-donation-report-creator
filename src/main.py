@@ -21,7 +21,7 @@ def helpMsg():
     print("m|manual       Instead of --source, interactive dialog to enter data manually (may be used together with --addressFile option)")
     print("a|addressFile  Csv file containing \"Lastname, Fistname\";\"Street + nr\";zip;\"Place\" rows")
     print("f|form         TO-67b pdf file (see README.md)")
-    print("r|range        Range string to print on output files")
+    print("r|range        Range string to print in output files field")
     print("d|date         Date string to print in signature line. Current date is used if not provided.")
     print("y|yes          Unattended mode, confirm most questions with yes. Useful for testing, Do not use for final run!")
     print("v|verbose      Print additional data like found form field names in input file")

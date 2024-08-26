@@ -56,7 +56,7 @@ cd jw-donation-report-creator
 
 # Create virtual python environment
 
-apt install python3.11-venv
+apt install python3.12-venv
 python3 -m venv ~/jw_donation_form_tool_venv
 
 source ~/jw_donation_form_tool_venv/bin/activate
@@ -64,6 +64,7 @@ source ~/jw_donation_form_tool_venv/bin/activate
 pip3 install .
 ```
 
+If you are coming from an existing venv setup, use `python3 -m venv --upgrade ~/jw_donation_form_tool_venv/` to upgrade venv to current python version
 
 # Usage
 Run like
