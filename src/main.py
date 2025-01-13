@@ -87,7 +87,7 @@ except getopt.GetoptError as e:
     helpMsg()
     sys.exit(2)
 
-if not os.path.exists(sourceFilePath):
+if not os.path.exists(sourceFilePath) and not manual:
     print(f"Bank report source file '{sourceFilePath}' not found!")
     sys.exit(2)
 if not os.path.exists(addressFilePath):
